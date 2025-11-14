@@ -1,5 +1,5 @@
 services:
-  db:
+  inventory-db:
     image: postgres:16
     container_name: inventory-db
     restart: always
@@ -19,7 +19,7 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
+  inventory-backend:
     build: .   # build locally using your Dockerfile
     container_name: inventory-backend
     depends_on:

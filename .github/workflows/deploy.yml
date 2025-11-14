@@ -26,5 +26,13 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /opt/inventory_backend
+            # docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }}
+              
+            # Force-update the image
             docker compose pull inventory-backend
-            docker compose up -d
+              
+            # Recreate container with new image
+            docker compose up -d --force-recreate inventory-backend
+              
+            # Optional: clear unused old images
+            docker image prune -f
