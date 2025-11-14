@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Copy Maven wrapper & settings first for better caching
 COPY mvnw .
+RUN chmod +x mvnw
 COPY .mvn .mvn
 COPY pom.xml .
 
