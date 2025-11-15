@@ -1,0 +1,74 @@
+name: CI-CD: Build & Deploy Backend
+
+on:
+  push:
+    branches: [ main ]
+  tags:
+    - "v*.*.*"      # runs only when Release-Please creates a version tag
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io \
+            -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+            
+      
+      # Build & push versioned image
+      - name: Build & Push Docker Image
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          docker build -t ghcr.io/kressin-labs/inventory-backend:$VERSION .
+          docker push ghcr.io/kressin-labs/inventory-backend:$VERSION
+
+      #- name: Build image
+      #  run: |
+      #    docker build -t ghcr.io/kressin-labs/inventory-backend:${{ steps.version.outputs.version }} .
+      #    docker tag ghcr.io/kressin-labs/inventory-backend:${{ steps.version.outputs.version }} \
+      #               ghcr.io/kressin-labs/inventory-backend:latest
+
+      #- name: Push images
+      #  run: |
+      #    docker push ghcr.io/kressin-labs/inventory-backend:${{ steps.version.outputs.version }}
+      #    docker push ghcr.io/kressin-labs/inventory-backend:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            VERSION="${GITHUB_REF#refs/tags/}"
+            VERSION="${VERSION#v}"
+            
+            cd /opt/inventory_backend
+            
+            # Update version in .env
+            echo "BACKEND_VERSION=$VERSION" | sudo tee .env > /dev/null
+            
+            # force pull correct tagged version
+            docker compose pull inventory-backend
+            
+            # redeploy container with same version
+            docker compose up -d --force-recreate --no-deps inventory-backend
+            
+            # delete old image version, to prevent the vps storage from filling up
+            docker image prune -af --filter "until=24h"
