@@ -3,8 +3,8 @@ name: CI-CD: Build and Deploy Backend
 on:
   push:
     branches: [ main ]
-  tags:
-    - "v*.*.*"      # runs only when Release-Please creates a version tag
+    tags:
+      - "v*.*.*"      # runs only when Release-Please creates a version tag
 
 jobs:
   build:
