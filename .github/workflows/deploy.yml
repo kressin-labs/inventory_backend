@@ -32,7 +32,7 @@ jobs:
             docker compose pull inventory-backend
               
             # Recreate container with new image
-            docker compose up -d --force-recreate inventory-backend
+            docker compose up -d --force-recreate --no-deps inventory-backend
               
             # Optional: clear unused old images
             docker image prune -f
