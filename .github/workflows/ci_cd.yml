@@ -1,9 +1,8 @@
 name: CI_CD Build and Deploy Backend
 
 on:
-  push:
-    tags:
-      - "v*.*.*"      # runs only when Release-Please creates a version tag
+  release:
+    types: [created]      # runs only when Release-Please creates a version tag
 
 jobs:
   build:
