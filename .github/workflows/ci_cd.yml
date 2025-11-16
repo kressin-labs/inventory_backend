@@ -2,7 +2,7 @@ name: CI_CD Build and Deploy Backend
 
 on:
   release:
-    types: [created]      # runs only when Release-Please creates a version tag
+    types: [published]      # runs only when Release-Please creates a version tag
 
 jobs:
   build:
@@ -14,9 +14,7 @@ jobs:
 
       - name: Extract version
         id: version
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_EVENT_RELEASE_TAG_NAME#v}" >> $GITHUB_OUTPUT
 
       - name: Login to GHCR
         run: |
