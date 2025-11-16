@@ -1,4 +1,4 @@
-name: CI-CD: Build and Deploy Backend
+name: CI_CD Build and Deploy Backend
 
 on:
   push:
@@ -32,17 +32,6 @@ jobs:
           VERSION=${{ steps.version.outputs.version }}
           docker build -t ghcr.io/kressin-labs/inventory-backend:$VERSION .
           docker push ghcr.io/kressin-labs/inventory-backend:$VERSION
-
-      #- name: Build image
-      #  run: |
-      #    docker build -t ghcr.io/kressin-labs/inventory-backend:${{ steps.version.outputs.version }} .
-      #    docker tag ghcr.io/kressin-labs/inventory-backend:${{ steps.version.outputs.version }} \
-      #               ghcr.io/kressin-labs/inventory-backend:latest
-
-      #- name: Push images
-      #  run: |
-      #    docker push ghcr.io/kressin-labs/inventory-backend:${{ steps.version.outputs.version }}
-      #    docker push ghcr.io/kressin-labs/inventory-backend:latest
 
   deploy:
     needs: build
