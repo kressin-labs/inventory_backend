@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/kressin-labs/inventory_backend/compare/v1.0.0...v1.1.0) (2025-11-16)
+
+
+### Features
+
+* test (no feature) ([eac4f27](https://github.com/kressin-labs/inventory_backend/commit/eac4f275f482eea8cffb634b99e3f5a151e01a62))
+
 ## 1.0.0 (2025-11-16)
 
 
