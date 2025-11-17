@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/kressin-labs/inventory_backend/compare/v1.3.0...v1.4.0) (2025-11-16)
+
+
+### Features
+
+* changed trigger of workflow ([3ec77ec](https://github.com/kressin-labs/inventory_backend/commit/3ec77ec9087433e6c57e2cb1b9453b95ac042a93))
+
 ## [1.3.0](https://github.com/kressin-labs/inventory_backend/compare/v1.2.0...v1.3.0) (2025-11-16)
 
 
