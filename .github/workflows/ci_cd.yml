@@ -2,7 +2,7 @@ name: CI_CD Build and Deploy Backend
 
 on:
   release:
-    types: [published]      # runs only when Release-Please creates a version tag
+    types: [created]      # runs only when Release-Please creates a version tag
 
 jobs:
   build:

@@ -1,20 +1,17 @@
-name: release-please
+name: Release Please (no PRs)
 
 on:
   push:
-    branches:
-      - main
-
-permissions:
-  contents: write
-  pull-requests: write
-  #releases: write
+    branches: [ main ]
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4
+      - name: Run Release Please
+        uses: googleapis/release-please-action@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           release-type: simple
-          target-branch: main
+          skip-github-pull-request: true
+          skip-labeling: true
