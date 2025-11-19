@@ -1,0 +1,106 @@
+name: Auto Release, Build, and Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # required to create tags
+
+      - name: Read current version
+        id: read_version
+        run: |
+          VERSION=$(cat version.txt)
+          echo "current=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Determine bump type from commit message
+        id: bump
+        run: |
+          MSG="${{ github.event.head_commit.message }}"
+          echo "Commit message: $MSG"
+
+          if echo "$MSG" | grep -qi "feat!"; then
+            echo "type=major" >> $GITHUB_OUTPUT
+          elif echo "$MSG" | grep -qi "^feat"; then
+            echo "type=minor" >> $GITHUB_OUTPUT
+          elif echo "$MSG" | grep -qi "^fix"; then
+            echo "type=patch" >> $GITHUB_OUTPUT
+          else
+            echo "type=none" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Skip if no bump required
+        if: steps.bump.outputs.type == 'none'
+        run: echo "No release bump required. Skipping."
+
+      - name: Calculate new version
+        id: new_version
+        if: steps.bump.outputs.type != 'none'
+        run: |
+          OLD=${{ steps.read_version.outputs.current }}
+          IFS='.' read -r MA MI PA <<< "$OLD"
+
+          case ${{ steps.bump.outputs.type }} in
+            major)
+              MA=$((MA+1)); MI=0; PA=0;;
+            minor)
+              MI=$((MI+1)); PA=0;;
+            patch)
+              PA=$((PA+1));;
+          esac
+
+          NEW="$MA.$MI.$PA"
+          echo "new=$NEW" >> $GITHUB_OUTPUT
+          echo "$NEW" > version.txt
+
+      - name: Commit & Tag new version
+        if: steps.bump.outputs.type != 'none'
+        run: |
+          NEW=${{ steps.new_version.outputs.new }}
+
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add version.txt
+          git commit -m "chore: bump version to $NEW"
+          git tag "v$NEW"
+          git push origin main --tags
+
+      - name: Login to GHCR
+        if: steps.bump.outputs.type != 'none'
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io \
+            -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+      - name: Build & push Docker image
+        if: steps.bump.outputs.type != 'none'
+        run: |
+          NEW=${{ steps.new_version.outputs.new }}
+          docker build -t ghcr.io/kressin-labs/inventory-backend:$NEW .
+          docker push ghcr.io/kressin-labs/inventory-backend:$NEW
+
+      - name: Deploy on VPS
+        if: steps.bump.outputs.type != 'none'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            VERSION=${{ steps.new_version.outputs.new }}
+
+            cd /opt/inventory_backend
+
+            echo "BACKEND_VERSION=$VERSION" | sudo tee .env > /dev/null
+
+            docker compose pull inventory-backend
+            docker compose up -d --force-recreate --no-deps inventory-backend
+
+            docker image prune -af --filter "until=24h"
