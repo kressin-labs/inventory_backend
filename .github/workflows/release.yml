@@ -69,6 +69,7 @@ jobs:
             # Update .env version
             sed -i "s/^BACKEND_VERSION=.*/BACKEND_VERSION=$VERSION/" .env
 
+
             docker compose pull inventory-backend
 
             # Restart only backend
