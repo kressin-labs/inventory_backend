@@ -20,7 +20,7 @@ services:
       retries: 5
 
   inventory-backend:
-    build: .   # build locally using your Dockerfile
+    build: /project   # build locally using your Dockerfile
     container_name: inventory-backend
     depends_on:
       inventory-db:
@@ -32,6 +32,14 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
       SERVER_PORT: ${SERVER_PORT}
+      
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      USER_USERNAME: ${USER_USERNAME}
+      USER_PASSWORD: ${USER_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
     ports:
       - "8080:8080"  # so you can test via http://localhost:8080
     networks:
