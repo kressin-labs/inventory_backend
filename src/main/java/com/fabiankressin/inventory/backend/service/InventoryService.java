@@ -31,6 +31,7 @@ public class InventoryService {
         Product p = Product.builder()
                 .name(request.name())
                 .quantity(request.quantity())
+                .imageBase64(request.imageBase64())
                 .build();
         return products.save(p);
     }

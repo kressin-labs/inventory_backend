@@ -2,5 +2,6 @@ package com.fabiankressin.inventory.backend.dto;
 
 public record CreateProductRequest(
         String name,
-        int quantity
+        int quantity,
+        String imageBase64
 ) {}
