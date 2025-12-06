@@ -4,4 +4,5 @@ public record CreateProductRequest(
         String name,
         int quantity,
         String imageBase64
-) {}
+) {
+}

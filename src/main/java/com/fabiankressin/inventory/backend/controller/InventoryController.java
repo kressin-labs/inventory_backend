@@ -4,6 +4,7 @@ import com.fabiankressin.inventory.backend.dto.CreateProductRequest;
 import com.fabiankressin.inventory.backend.dto.QuantityUpdateRequest;
 import com.fabiankressin.inventory.backend.model.Product;
 import com.fabiankressin.inventory.backend.service.InventoryService;
+import com.fabiankressin.inventory.backend.dto.ProductResponse;
 
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,8 +39,14 @@ public class InventoryController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public Product create(@RequestBody CreateProductRequest request) {
-        return inventory.create(request);
+    public ProductResponse create(@RequestBody CreateProductRequest request) {
+        Product savedProduct = inventory.create(request);
+        return new ProductResponse(
+                savedProduct.getId(),
+                savedProduct.getName(),
+                savedProduct.getQuantity(),
+                savedProduct.getImageBase64()
+        );
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -57,7 +64,7 @@ public class InventoryController {
         boolean isUser = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER"));
 
         // Users may only increase up to 5
-        if (isUser && (req.amount() > 5 || req.amount() < 0 )) {
+        if (isUser && (req.amount() > 5 || req.amount() < 0)) {
             throw new IllegalArgumentException("Users can only increase by up to 5 at a time.");
         }
 
@@ -73,7 +80,7 @@ public class InventoryController {
         boolean isUser = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER"));
 
         // Users may only increase up to 5
-        if (isUser && (req.amount() > 5 || req.amount() < 0 )) {
+        if (isUser && (req.amount() > 5 || req.amount() < 0)) {
             throw new IllegalArgumentException("Users can only decrease by up to 5 at a time.");
         }
 
