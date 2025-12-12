@@ -27,8 +27,15 @@ public class InventoryController {
 
     @PermitAll
     @GetMapping
-    public List<Product> listAll() {
-        return inventory.listAll();
+    public List<ProductResponse> listAll() {
+        return inventory.listAll().stream()
+                .map(p -> new ProductResponse(
+                        p.getId(),
+                        p.getName(),
+                        p.getQuantity(),
+                        p.getImageBase64(),
+                        p.getInfo()))
+                .toList();
     }
 
     @PermitAll
@@ -45,7 +52,8 @@ public class InventoryController {
                 savedProduct.getId(),
                 savedProduct.getName(),
                 savedProduct.getQuantity(),
-                savedProduct.getImageBase64()
+                savedProduct.getImageBase64(),
+                savedProduct.getInfo()
         );
     }
 

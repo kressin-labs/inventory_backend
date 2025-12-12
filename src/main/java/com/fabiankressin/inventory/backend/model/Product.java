@@ -25,4 +25,7 @@ public class Product {
     @Lob
     @Column(name = "image_base64", columnDefinition = "TEXT")
     private String imageBase64;
+
+    @Column(columnDefinition = "TEXT")
+    private String info;
 }
